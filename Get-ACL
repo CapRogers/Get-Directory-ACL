@@ -1,22 +1,52 @@
-    # Get's the directory you want to scan ACLs
-$items = Get-ChildItem -Directory -Path $itemPath
-$itemPath = (Read-Host -Prompt "Which directory would you like to scan for ACL's?")
+$path = (Read-Host -Prompt "Which directory would you like to scan for ACL's?")
+$itm = Get-ChildItem -Directory -Path $path
+$acl = Get-Acl -Path $path
+$namePotato = "Folder Name = "
+$pathPotato = "Folder Path = "
+$outFileItm = (Read-Host -Prompt "To Save the out-put: Please type the directory path followed by file name and .txt")
+$space = "
+---------------------------------------------------------------------
+"
 
-    # Saves the ACL list to a .txt file
-$save = Read-Host -Prompt "Where would you like to save this file?"
-$saveName = Read-Host -Prompt "What will this files name be?"
-
-
-    # ACL loop
-    # This loop looks at the first subdirectory. Then the loop only scans directorys for ACLs
-    # The directory path and ACLs are saved to the .txt file noted on line 4
-
-foreach ($item in $items) {
-    if ($items.Name -imatch "$_") {$folderList = "$itemPath"+"\"+"$item"}
-    $folderList | foreach {
-        $aclGet = (Get-Acl -Path $folderList)
-        $aclGet[0].Path | Out-File $save"\"$saveName.txt -Append
-        $aclGet[0].Access | Select-Object IdentityReference,FileSystemRights,AccessControlType | Format-List | Out-File $save"\"$saveName.txt -Append
-        
+Foreach ($potato in $itm) {
+    if ($potato.Name -imatch $_) {$unc = "$path""\""$potato"}
+    $unc | Foreach {
+        $namePotato+$potato[0].Name | Format-List | Out-File $outFileItm -Append
+        $pathPotato+$potato[0].FullName | Format-List | Out-File $outFileItm -Append
+        $ParentPotato = "Parent Directory = "+"\\usirvdata03\Danco$\"+$potato[0].Parent | Format-List | Out-File $outFileItm -Append
+        $space | Format-List | Out-File $outFileItm -Append
     }
 }
+
+
+
+$path = "\\usirvdata02\Danco$\Groups"
+$itm = Get-ChildItem -Directory -Path $path
+$acl = Get-Acl -Path $path
+$outFileAcl = "C:\Directory ACls.txt"
+$folderIsReal = "Folder is real = "
+$lastTimeAccess = "Last time the folder was accessed = "
+$lastTimeWriten = "Last time the folder was written to = "
+$FolderCreatedDate = "Date the folder was created = "
+$space = "---------------------------------------------------------------------
+
+
+"
+
+
+foreach ($chip in $itm) {
+    if ($itm.Name -imatch $_) {$fld = $path+"\"+$chip}
+    "Folder Name = "+$chip[0].Name | Format-List | Format-List | Out-File $outFileAcl -Append
+    $lastTimeAccess+$chip[0].LastAccessTimeUtc.DateTime | Format-List | Out-File $outFileAcl -Append
+    $lastTimeWriten+$chip[0].LastWriteTimeUtc.DateTime | Format-List | Out-File $outFileAcl -Append
+    $FolderCreatedDate+$chip[0].CreationTimeUtc.DateTime | Format-List | Out-File $outFileAcl -Append
+    $folderIsReal+$chip[0].Exists | Format-List | Out-File $outFileAcl -Append
+    
+    $fld | Foreach {
+        $aclGet = (Get-Acl -Path $fld)
+        $aclGet[0].Access | Select-Object IdentityReference,FileSystemRights,AccessControlType | Format-List | Out-File $outFileAcl -Append
+        $space | Out-File $outFileAcl -Append
+    }
+
+
+} 
