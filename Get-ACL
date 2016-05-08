@@ -1,0 +1,22 @@
+    # Get's the directory you want to scan ACLs
+$items = Get-ChildItem -Directory -Path $itemPath
+$itemPath = (Read-Host -Prompt "Which directory would you like to scan for ACL's?")
+
+    # Saves the ACL list to a .txt file
+$save = Read-Host -Prompt "Where would you like to save this file?"
+$saveName = Read-Host -Prompt "What will this files name be?"
+
+
+    # ACL loop
+    # This loop looks at the first subdirectory. Then the loop only scans directorys for ACLs
+    # The directory path and ACLs are saved to the .txt file noted on line 4
+
+foreach ($item in $items) {
+    if ($items.Name -imatch "$_") {$folderList = "$itemPath"+"\"+"$item"}
+    $folderList | foreach {
+        $aclGet = (Get-Acl -Path $folderList)
+        $aclGet[0].Path | Out-File $save"\"$saveName.txt -Append
+        $aclGet[0].Access | Select-Object IdentityReference,FileSystemRights,AccessControlType | Format-List | Out-File $save"\"$saveName.txt -Append
+        
+    }
+}
